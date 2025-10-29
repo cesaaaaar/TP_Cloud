@@ -1,0 +1,9 @@
+Host az1
+    HostName 4.211.174.93
+    User cesaaar
+    ForwardAgent yes
+
+Host az2
+    HostName 10.0.0.6
+    User cesaaar
+    ProxyJump az1
