@@ -1,4 +1,4 @@
-````markdown
+
 # 📄 Instructions du TP - Gestion de VMs et Clés SSH
 
 ---
@@ -60,7 +60,7 @@ ssh-keygen -t ed25519 -f C:\Users\Julien\.ssh\cloud_tp
 
 # II. Spawn des VMs (Virtual Machines)
 
-## 1\. Depuis la WebUI (méthode non utilisée)
+## 1\. Depuis la WebUI (non vu que ça marche pas)
 
 **🌞 Connectez-vous en SSH à la VM pour preuve**
 
@@ -215,3 +215,4 @@ az vm create --resource-group TPCesaaar --name azure2.tp1 --image Ubuntu2204 --a
       Memory usage: 32%               IPv4 address for eth0: 10.0.0.6
       Swap usage:   0%
     ```
+
