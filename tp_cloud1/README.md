@@ -216,3 +216,164 @@ az vm create --resource-group TPCesaaar --name azure2.tp1 --image Ubuntu2204 --a
       Swap usage:   0%
     ```
 
+
+-----
+
+## III. Déployer et configurer un machin
+
+### 1\. Machine `azure2.tp1`
+
+#### 🌞 Installer MySQL/MariaDB sur `azure2.tp1`
+
+```bash
+sudo apt install mysql-server
+```
+
+#### 🌞 Démarrer le service MySQL/MariaDB sur `azure2.tp1`
+
+```bash
+cesaaar@azure2:~$ systemctl status mysql.service
+● mysql.service - MySQL Community Server
+     Loaded: loaded (/lib/systemd/system/mysql.service; enabled; vendor preset: enabled)
+     Active: active (running) since Thu 2025-10-30 07:50:45 UTC; [cite_start]37s ago [cite: 1, 2]
+```
+
+#### 🌞 Ajouter un utilisateur dans la base de données pour que mon app puisse s'y connecter
+
+```bash
+cesaaar@azure2:~$ sudo mysql
+```
+
+```sql
+mysql> CREATE DATABASE cesaarbase;
+[cite_start]Query OK, 1 row affected (0.04 sec) [cite: 3]
+
+mysql> CREATE USER 'meow'@'%' IDENTIFIED BY 'meow';
+[cite_start]Query OK, 0 rows affected (0.04 sec) [cite: 4]
+
+mysql> GRANT ALL ON cesaarbase.* TO 'meow'@'%';
+[cite_start]Query OK, 0 rows affected (0.03 sec) [cite: 5]
+
+mysql> FLUSH PRIVILEGES;
+```
+
+#### 🌞 Ouvrez un port firewall si nécessaire
+
+Dans la conf MySQL:
+
+```ini
+bind-address            = 0.0.0.0
+```
+
+```bash
+cesaaar@azure1:~$ mysql -u meow -p -h 10.0.0.6 cesaarbase
+```
+
+-----
+
+### 2\. Machine `azure1.tp1`
+
+#### A. Récupération de l'application sur la machine
+
+##### 🌞 Récupération de l'application sur la machine
+
+```bash
+cesaaar@azure1:/opt/meow$ sudo git clone https://gitlab.com/it4lik/b2-pano-cloud-2025.git
+cesaaar@azure1:/opt/meow$ sudo cp -r b2-pano-cloud-2025/docs/tp/1/app/* /opt/meow
+cesaaar@azure1:/opt/meow$ sudo cp b2-pano-cloud-2025/docs/tp/1/app/.env /opt/meow
+```
+
+#### B. Installation des dépendances de l'application
+
+##### 🌞 Installation des dépendances de l'application
+
+```bash
+cesaaar@azure1:/opt/meow$ sudo chown -R cesaaar:cesaaar /opt/meow
+
+cesaaar@azure1:/opt/meow$ sudo apt install python3.10-venv
+
+cesaaar@azure1:/opt/meow$ python3 -m venv .
+[cite_start]cesaaar@azure1:/opt/meow$ ./bin/pip install -r requirements.txt [cite: 6]
+```
+
+#### C. Configuration de l'application
+
+##### 🌞 Configuration de l'application
+
+```bash
+cesaaar@azure1:/opt/meow$ sudo nano .env
+```
+
+```ini
+# Database Configuration
+DB_HOST=10.0.0.6 # changez ça pour l'adresse IP de azure2.tp1
+DB_PORT=3306
+DB_NAME=cesaarbase
+DB_USER=meow
+DB_PASSWORD=meow
+```
+
+#### D. Gestion de users et de droits
+
+##### 🌞 Gestion de users et de droits
+
+```bash
+cesaaar@azure1:/opt/meow$ sudo useradd webapp
+cesaaar@azure1:/opt/meow$ sudo chown -R webapp:webapp /opt/meow
+cesaaar@azure1:/opt/meow$ sudo chmod -R o-rwx /opt/meow
+```
+
+#### E. Création d'un service `webapp.service` pour lancer l'application
+
+##### 🌞 Création d'un service `webapp.service` pour lancer l'application
+
+```bash
+cesaaar@azure1:/opt/meow$ sudo nano /etc/systemd/system/webapp.service
+cesaaar@azure1:/opt/meow$ sudo systemctl daemon-reload
+```
+
+-----
+
+### 3\. Visitez l'application
+
+#### 🌞 L'application devrait être fonctionnelle sans soucis à partir de là
+
+```powershell
+PS C:\WINDOWS\system32> az vm open-port --resource-group TPCesaaar --name azure1.tp1 --port 8000 --priority 1012
+```
+
+```bash
+cesaaar@azure1:/$ sudo -u webapp /opt/meow/bin/python /opt/meow/app.py
+ * [cite_start]Serving Flask app 'app' [cite: 7]
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment.
+[cite_start]Use a production WSGI server instead. [cite: 8]
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://10.0.0.5:8000
+```
+
+```powershell
+C:\Users\Julien>curl http://4.211.174.93:8000
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purr Messages - Cat Message Board</title>
+    <style>
+        /* Modern CSS with cat-themed design */
+        :root {
+            [cite_start]--primary: #ff6b6b; [cite: 9]
+            --secondary: #4ecdc4;
+            --accent: #ffd166;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --cat-paw: #ff9a8b;
+        }
+}
+```
